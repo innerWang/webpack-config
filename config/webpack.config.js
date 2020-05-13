@@ -3,6 +3,8 @@
 const path = require('path')
 const paths = require('./paths')
 
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
 const isEnvDevelopment = process.env.NODE_ENV === 'development'
 const isEnvProduction = process.env.NODE_ENV === 'production'
 
@@ -16,5 +18,9 @@ module.exports = {
     filename: isEnvProduction
       ? 'static/js/[name].[contenthash:8].js'
       : isEnvDevelopment && 'static/js/bundle.js'
-  }
+  },
+  plugins: [
+    // 打包前清空output.path所指定的目录中的文件
+    new CleanWebpackPlugin()
+  ]
 }
