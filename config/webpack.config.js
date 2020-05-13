@@ -19,6 +19,25 @@ module.exports = {
       ? 'static/js/[name].[contenthash:8].js'
       : isEnvDevelopment && 'static/js/bundle.js'
   },
+  module: {
+    rules: [
+      {
+        oneOf: [
+          {
+            test: /\.(js|jsx|ts|tsx|mjs)$/,
+            loader: require.resolve('babel-loader'),
+            include: paths.appSrc,
+            options: {
+              presets: ['@babel/preset-env'],
+              plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
+              // webpack 特有的babel-loader 配置，使能缓存：./node_modules/.cache/babel-loader/
+              cacheDirectory: true
+            }
+          }
+        ]
+      }
+    ]
+  },
   plugins: [
     // 打包前清空output.path所指定的目录中的文件
     new CleanWebpackPlugin()
