@@ -10,6 +10,10 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const isEnvDevelopment = process.env.NODE_ENV === 'development'
 const isEnvProduction = process.env.NODE_ENV === 'production'
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
+const imageInlineSizeLimit = parseInt(
+  process.env.IMAGE_INLINE_SIZE_LIMIT || '10240'
+)
+
 const cssRegex = /\.css$/
 const sassRegex = /\.(scss|sass)$/
 
@@ -65,6 +69,14 @@ module.exports = {
     rules: [
       {
         oneOf: [
+          {
+            test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+            loader: require.resolve('url-loader'),
+            options: {
+              limit: imageInlineSizeLimit,
+              name: 'static/media/[name].[hash:8].[ext]'
+            }
+          },
           {
             test: /\.(js|jsx|ts|tsx|mjs)$/,
             loader: require.resolve('babel-loader'),
