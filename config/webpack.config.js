@@ -92,6 +92,24 @@ module.exports = {
               importLoaders: 1,
               sourceMap: isEnvProduction && shouldUseSourceMap
             })
+          },
+          {
+            test: sassRegex,
+            use: getStyleLoaders(
+              {
+                modules: {
+                  localIdentName: '[path][name]__[local]--[hash:base64:5]'
+                },
+                importLoaders: 2,
+                sourceMap: isEnvProduction && shouldUseSourceMap
+              },
+              'sass-loader',
+              {
+                // 在 scss 文件前面插入的内容
+                prependData: `$primary-color: #025ad3;`,
+                sourceMap: true
+              }
+            )
           }
         ]
       }
