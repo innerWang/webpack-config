@@ -20,6 +20,18 @@ module.exports = {
       ? 'static/js/[name].[contenthash:8].js'
       : isEnvDevelopment && 'static/js/bundle.js'
   },
+  devServer: {
+    // 默认使用项目根目录作为源文件目录，结合 html-webpack-plugin 一起使用时会将打包后的文件存在内存中
+    //contentBase: paths.publicUrl,
+    //publicPath: '/',
+    // 所有路由跳转都先指回index.html，开发单页应用时很有用
+    historyApiFallback: true,
+    compress: true, //是否启用 gzip 压缩
+    inline: true,
+    port: 3000,
+    open: true, // 启用时默认打开浏览器
+    stats: 'errors-only' //终端仅打印 error
+  },
   module: {
     rules: [
       {
