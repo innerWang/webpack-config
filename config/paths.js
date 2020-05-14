@@ -53,6 +53,10 @@ module.exports = {
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
   appSrc: resolveApp('src'),
+  appTsConfig: resolveApp('tsconfig.json'),
+  appJsConfig: resolveApp('jsconfig.json'),
   appPackageJson: resolveApp('package.json'),
   publicUrl: getPublicUrl(resolveApp('package.json'))
 }
+
+module.exports.moduleFileExtensions = moduleFileExtensions

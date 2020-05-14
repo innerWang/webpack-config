@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const fs = require('fs')
 const paths = require('./paths')
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
@@ -13,6 +14,9 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10240'
 )
+
+// Check if TypeScript is setup
+const useTypeScript = fs.existsSync(paths.appTsConfig)
 
 const cssRegex = /\.css$/
 const sassRegex = /\.(scss|sass)$/
@@ -65,6 +69,16 @@ module.exports = {
     open: true, // 启用时默认打开浏览器
     stats: 'errors-only' //终端仅打印 error
   },
+  resolve: {
+    // 可自动解析的扩展，配置后即可以缺省文件后缀，要将高频的后缀放在前面，不配置只会找对应的.js文件
+    extensions: paths.moduleFileExtensions
+      .map(ext => `.${ext}`)
+      .filter(ext => useTypeScript || !ext.includes('ts')),
+    // 给用于 import、require 的路径起别名，简化模块引入
+    alias: {
+      '@': paths.appSrc
+    }
+  },
   module: {
     rules: [
       {
@@ -82,7 +96,7 @@ module.exports = {
             loader: require.resolve('babel-loader'),
             include: paths.appSrc,
             options: {
-              presets: ['@babel/preset-env'],
+              presets: ['@babel/preset-env', '@babel/preset-react'],
               plugins: [['@babel/plugin-transform-runtime', { corejs: 3 }]],
               // webpack 特有的babel-loader 配置，使能缓存：./node_modules/.cache/babel-loader/
               cacheDirectory: true
