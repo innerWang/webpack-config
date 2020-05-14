@@ -20,6 +20,12 @@ module.exports = {
       ? 'static/js/[name].[contenthash:8].js'
       : isEnvDevelopment && 'static/js/bundle.js'
   },
+  // 配置 source-map
+  devtool: isEnvProduction
+    ? shouldUseSourceMap
+      ? 'source-map'
+      : false
+    : isEnvDevelopment && 'cheap-module-source-map',
   devServer: {
     // 默认使用项目根目录作为源文件目录，结合 html-webpack-plugin 一起使用时会将打包后的文件存在内存中
     //contentBase: paths.publicUrl,
