@@ -88,6 +88,7 @@ module.exports = {
             loader: require.resolve('url-loader'),
             options: {
               limit: imageInlineSizeLimit,
+              esModule: false,
               name: 'static/media/[name].[hash:8].[ext]'
             }
           },
