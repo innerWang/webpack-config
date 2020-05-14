@@ -5,9 +5,32 @@ const paths = require('./paths')
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const isEnvDevelopment = process.env.NODE_ENV === 'development'
 const isEnvProduction = process.env.NODE_ENV === 'production'
+const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
+const cssRegex = /\.css$/
+const sassRegex = /\.(scss|sass)$/
+
+const getStyleLoaders = (cssOptions, preProcessor, preProcessorOptions) => {
+  const loaders = [
+    isEnvDevelopment && require.resolve('style-loader'),
+    isEnvProduction && MiniCssExtractPlugin.loader,
+    {
+      loader: require.resolve('css-loader'),
+      options: cssOptions
+    },
+    require.resolve('postcss-loader')
+  ].filter(Boolean)
+  if (preProcessor) {
+    loaders.push({
+      loader: require.resolve(preProcessor),
+      options: Object.assign({}, preProcessorOptions)
+    })
+  }
+  return loaders
+}
 
 module.exports = {
   mode: isEnvDevelopment ? 'development' : isEnvProduction && 'production',
@@ -52,6 +75,23 @@ module.exports = {
               // webpack 特有的babel-loader 配置，使能缓存：./node_modules/.cache/babel-loader/
               cacheDirectory: true
             }
+          },
+          {
+            test: cssRegex,
+            use: getStyleLoaders({
+              // 指定启用css module 并设置对应的规则
+              modules: {
+                // 指定类名， [local]指原始类名, [name]是文件名
+                // https://github.com/webpack/loader-utils#interpolatename
+                localIdentName: '[path][name]__[local]--[hash:base64:5]'
+              },
+              // 在 css-loader 处理 @import 引入的资源之前需要经历多少个 loader
+              // 0 => no loaders (default);
+              // 1 => postcss-loader;
+              // 2 => postcss-loader, sass-loader;
+              importLoaders: 1,
+              sourceMap: isEnvProduction && shouldUseSourceMap
+            })
           }
         ]
       }
@@ -81,6 +121,11 @@ module.exports = {
             }
           : undefined
       )
-    )
+    ),
+    // 将每一个包含有css的js文件中的css单独抽离为一个文件
+    new MiniCssExtractPlugin({
+      filename: 'static/css/[name].[contenthash:8].css',
+      chunkFilename: 'static/css/[name].[contenthash:8].chunk.css'
+    })
   ]
 }
