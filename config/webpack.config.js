@@ -2,12 +2,15 @@
 
 const path = require('path')
 const fs = require('fs')
-const paths = require('./paths')
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const webpack = require('webpack')
+
+const paths = require('./paths')
+const getClientEnvironment = require('./env')
 
 const isEnvDevelopment = process.env.NODE_ENV === 'development'
 const isEnvProduction = process.env.NODE_ENV === 'production'
@@ -15,6 +18,13 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10240'
 )
+
+const publicPath = isEnvProduction ? paths.servedPath : isEnvDevelopment && '/'
+
+const publicUrl = isEnvProduction
+  ? publicPath.slice(0, -1)
+  : isEnvDevelopment && ''
+const env = getClientEnvironment(publicUrl)
 
 // Check if TypeScript is setup
 const useTypeScript = fs.existsSync(paths.appTsConfig)
@@ -181,6 +191,8 @@ module.exports = {
       chunkFilename: 'static/css/[name].[contenthash:8].chunk.css'
     }),
     // 压缩css
-    new OptimizeCssAssetsPlugin()
+    new OptimizeCssAssetsPlugin(),
+    // 配置全局变量
+    new webpack.DefinePlugin(env.stringified)
   ]
 }
