@@ -8,6 +8,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const webpack = require('webpack')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 const paths = require('./paths')
 const getClientEnvironment = require('./env')
@@ -193,6 +194,8 @@ module.exports = {
     // 压缩css
     new OptimizeCssAssetsPlugin(),
     // 配置全局变量
-    new webpack.DefinePlugin(env.stringified)
+    new webpack.DefinePlugin(env.stringified),
+    // 构建后查看包的体积，会自动打开http://127.0.0.1:8888/
+    new BundleAnalyzerPlugin()
   ]
 }
