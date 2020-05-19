@@ -140,7 +140,9 @@ module.exports = {
               // 2 => postcss-loader, sass-loader;
               importLoaders: 1,
               sourceMap: isEnvProduction && shouldUseSourceMap
-            })
+            }),
+            // 将css 设置为有副作用的，则不会被 tree-shaking
+            sideEffects: true
           },
           {
             test: sassRegex,
@@ -158,7 +160,8 @@ module.exports = {
                 prependData: `$primary-color: #025ad3;`,
                 sourceMap: true
               }
-            )
+            ),
+            sideEffects: true
           },
           {
             loader: require.resolve('file-loader'),
