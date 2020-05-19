@@ -75,11 +75,17 @@ module.exports = {
 
 #### 5. optimization
 
+- `minimize`: 告诉 webpack 使用 minimizer 中指定的插件压缩 bundle，`production`模式下默认为`true`
+  注意：
+  当将用于压缩 css 的 optimize-css-assets-webpack-plugin 配置在此选项而不是 plugins 时，需要同时配置 js 的压缩
 - `minimizer` : 配置输出的文件压缩插件
-- `splitChunks` : 代码分割，优化的公共 chunk 提取，替代原先的`CommonsChunkPlugin`
-  - 参考 https://juejin.im/post/5c9075305188252d5c743520
-
-当将用于压缩 css 的 optimize-css-assets-webpack-plugin 配置在此选项而不是 plugins 时，需要同时配置 js 的压缩
+- `splitChunks` : 代码分割，抽离公共代码，替代原先的`CommonsChunkPlugin`
+  - `chunks`: 用于优化的 chunks 的类型，可选`all`(所有引入的库)、`async`(异步引入的库)、`initial`(同步引入的库)
+  - `minChunks`: 最小引用次数
+  - `name`: 分离出来的代码块的名称，设置为 true 时会自动根据 chunks 及 cache group 的 key 生成名称，官方推荐在生产模式将其设置为 false
+  - `cacheGroups`: 可以继承或者复写来自`splitChunks.*`的配置项，此外还可以配置`test`、`priority`、`reuseExistingChunk`
+    - `priority`: 设置权重
+    - `test`: 用于控制当前组可选择的模块
 
 需要注意的是优化只能在`production`模式下进行，一般是判断 `process.env.NODE_ENV`，但是`process.env`默认并不包含`NODE_ENV`属性，命令行方式可以采用`cross-env`来设置属性方便`webpack`读取
 
@@ -96,6 +102,10 @@ $ yarn add cross-env -D
 }
 
 ```
+
+#### 6. externals
+
+我们可以将一些依赖存在 CDN 上，在 index.html 中通过`<script>`标签引入，但是使用时仍然期望可以通过 import 去引用，且希望 webpack 不将其打包进 bundle 文件，即可以将其配置在 externals 属性上。
 
 ### 1. source map
 
@@ -144,9 +154,9 @@ module.exports = {
     rules: [
       {
         /**  规则详情  **/
-      }
-    ]
-  }
+      },
+    ],
+  },
 }
 ```
 
@@ -158,7 +168,6 @@ module.exports = {
   - `loader`: 所使用的`loader`的名称(**必需!!!**)
   - `options`：
 - `test`：一个用于匹配`loaders`所处理的文件拓展名的正则表达式(**必需!!!**)
-
 - `oneOf`：仅使用该数组中第一个匹配的规则
 
 #### 1. Babel
@@ -187,12 +196,12 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-transform-runtime']
-          }
-        }
-      }
-    ]
-  }
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
+        },
+      },
+    ],
+  },
 }
 ```
 
@@ -215,10 +224,10 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader'
-      }
-    ]
-  }
+        loader: 'babel-loader',
+      },
+    ],
+  },
 }
 ```
 
@@ -286,8 +295,8 @@ CSS 预处理器用一种专门的编程语言，是对 原生 css 的扩展，�
     'postcss-loader',
     {
       loader: 'sass-loader',
-      options: { prependData: `$primary-color: #025ad3;` }
-    }
+      options: { prependData: `$primary-color: #025ad3;` },
+    },
   ]
 }
 ```
@@ -323,13 +332,13 @@ Autoprefixer 会读取 browserlist ，根据设置的所需兼容的浏览器版
   use: [
     'style-loader',
     { loader: 'css-loader', options: { importLoaders: 1 } },
-    'postcss-loader'
+    'postcss-loader',
   ]
 }
 
 // postcss.config.js
 module.exports = {
-  plugins: [require('autoprefixer')]
+  plugins: [require('autoprefixer')],
 }
 
 // package.json
@@ -364,11 +373,39 @@ file-loader 的 options：
 
 - **疑惑**， cra 并没有配置，为嘛不会出问题？？
 
+#### 4 cache-loader
+
+在一些性能开销较大的 loader 前面使用此 loader，将结果缓存到磁盘中，保存和读取缓存也会有时间开销，建议只对性能开销比较大的 loader 进行此处理
+
+#### 5 eslint-loader
+
+使用时需要：
+
+- 安装 eslint-loader eslint
+- 在 webpackOptions.module.rules 中增加一个 eslint 的配置项
+- 安装 babel-eslint
+- 添加 .eslintrc.js 文件，设置 env、parser 等配置项
+- 安装 eslint-plugin-react ，在 .eslintrc.js 的 extends 中增加配置
+
+到上述为止，eslint 主要会对代码质量上的错误进行提示，若想对于代码风格错误有更全面的提示，可以配置 prettier
+
+- 安装 prettier、eslint-config-prettier、 eslint-plugin-prettier
+- 在 .eslintrc.js 中增加 prettier 的配置
+- 新增 .prettierrc 文件，自定义规则
+
+**需要注意的是**，prettier 从 v2.0.0 开始配置项的默认值有更改！(含 `trailing comma`，`arrow parens`，`end of line`)。
+
+对于 end of line 的更改，需要在仓库的`.gitattributes`文件中添加`* text=auto eol=lf`配置. 然后 windows 用户再去 clone 仓库以保证 checkout 的时候不会将 `lf`转换为`crlf`。
+
+<br>
+
 ### 4. Plugins
 
 用于扩展 webpack 的功能，loader 是用于处理单个文件的，plugin 则直接在整个构建过程中生效
 
 使用插件也是需要安装，并在`webpack.config.js`中的`plugins`数组中添加一个该插件的实例
+
+当使用插件对输出结果处理时，应当在文件输出到磁盘之前处理。
 
 #### 1. HTMLWebpackPlugin
 
@@ -384,7 +421,6 @@ file-loader 的 options：
 - `title`，生成的 html 文档的标题，配置后还需要在模板中使用模板引擎语法获取该值
 - `template`，使用的模板文件，没有指定 loader 时，默认使用`ejs-loader`
 - `favicon`，可能由于缓存不显示，需要强制刷新
-
 - `minify`，配置压缩参数
 
 ```shell
@@ -397,9 +433,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'public/index.html'
-    })
-  ]
+      template: 'public/index.html',
+    }),
+  ],
 }
 ```
 
@@ -546,6 +582,14 @@ if (module.hot) {
 - 安装依赖
 - `webpackOptions.plugins`中新增一个实例
 
+#### 12. IgnorePlugin
+
+功能：webpack 的内置插件，用来忽略第三方包指定目录
+
+如打包时只打包核心功能，对于国际化等内容通过手动引入，减小 bundle 文件体积
+
 ## webpack 其他
 
 - `webpack watch+nodemon`支持 SSR 热调试
+- webpack4 默认支持 Tree-Shaking，
+  - 条件： 生产模式下，采用 ES6 的`import`语法进行模块导入(注意动态导入无法做 tree-shaking)
