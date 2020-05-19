@@ -91,6 +91,16 @@ module.exports = {
       '@': paths.appSrc
     }
   },
+  optimization: {
+    splitChunks: {
+      chunks: 'all', // 设置所有导入都进行分割
+      name: false
+    },
+    // 将包含 chunk 映射关系的列表从 main.js中抽离出来
+    runtimeChunk: {
+      name: entrypoint => `runtime~${entrypoint.name}`
+    }
+  },
   module: {
     rules: [
       {
