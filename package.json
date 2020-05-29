@@ -1,8 +1,6 @@
 {
   "name": "react-cart-ts",
   "version": "1.0.0",
-  "main": "index.js",
-  "author": "innerwang <52886377@qq.com>",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.9.6",
