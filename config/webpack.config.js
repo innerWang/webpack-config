@@ -196,7 +196,7 @@ module.exports = {
           // html 模板的位置
           template: path.resolve(paths.appPublic, 'index.html'),
           // 默认需要使用 ejs 语法在模板中解析该值才可以使用
-          title: 'react-cart',
+          title: 'webpack-config',
           // 配置后会自动将指定路径的 favicon 打包到 output.path， 同时在生成的 html 文档中插入<link />
           favicon: path.resolve(paths.appPublic, 'favicon.ico'),
         },
